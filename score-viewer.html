@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>乐谱查看器 - 中小学音乐教师音频社区</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'ZCOOL KuaiLe', '幼圆', Arial, sans-serif;
+            background: #f8fafc;
+        }
+
+        .score-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: white;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .score-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a202c;
+        }
+
+        .close-btn {
+            color: #4a5568;
+            font-size: 1.5rem;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            background: #f7fafc;
+            color: #2d3748;
+        }
+
+        .score-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 80px);
+            overflow: hidden;
+        }
+
+        #pdf-viewer {
+            flex: 1;
+            overflow: auto;
+            padding: 1.5rem;
+        }
+
+        .score-page {
+            position: relative;
+            margin: 0 auto 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            max-width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .score-page canvas {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .score-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'ZCOOL KuaiLe', '幼圆', Arial, sans-serif;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .control-btn i {
+            font-size: 1.25rem;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f7fafc;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .zoom-value {
+            min-width: 60px;
+            text-align: center;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        input[type="range"] {
+            width: 100px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: #e2e8f0;
+            border-radius: 2px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #3b82f6;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #2563eb;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            background: #3b82f6;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: none;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            background: #2563eb;
+        }
+
+        .page-counter {
+            background: #f7fafc;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            color: #2d3748;
+            font-weight: bold;
+        }
+
+        .error-message {
+            text-align: center;
+            color: #dc2626;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- 标题栏 -->
+    <div class="score-header">
+        <div class="flex items-center gap-4">
+            <a href="javascript:history.back()" class="text-blue-500 hover:text-blue-700 font-bold">
+                <i class="fa-solid fa-arrow-left"></i> 返回
+            </a>
+            <h1 class="score-title" id="score-title">乐谱查看器</h1>
+        </div>
+        <button class="close-btn" onclick="window.close()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
+    <!-- PDF查看器 -->
+    <div class="score-container">
+        <div id="pdf-viewer">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p class="text-gray-600">正在加载乐谱...</p>
+            </div>
+        </div>
+
+        <!-- 控制栏 -->
+        <div class="score-controls">
+            <button class="control-btn" id="prev-page-btn" title="上一页">
+                <i class="fa-solid fa-chevron-left"></i>上一页
+            </button>
+
+            <div class="page-counter">
+                <span id="current-page">1</span> / <span id="total-pages">0</span>
+            </div>
+
+            <button class="control-btn" id="next-page-btn" title="下一页">
+                下一页<i class="fa-solid fa-chevron-right"></i>
+            </button>
+
+            <div style="flex: 1;"></div>
+
+            <div class="zoom-controls">
+                <button class="control-btn" id="zoom-out-btn" style="min-width: 40px; padding: 0.5rem;">
+                    <i class="fa-solid fa-minus"></i>
+                </button>
+                <input type="range" id="zoom-slider" min="50" max="300" value="100" step="10">
+                <span class="zoom-value" id="zoom-value">100%</span>
+                <button class="control-btn" id="zoom-in-btn" style="min-width: 40px; padding: 0.5rem;">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+
+            <button class="control-btn" id="fullscreen-btn" title="全屏">
+                <i class="fa-solid fa-expand"></i>全屏
+            </button>
+
+            <button class="control-btn" id="download-btn" title="下载PDF">
+                <i class="fa-solid fa-download"></i>下载
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 初始化 PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        let pdfDoc = null;
+        let currentPage = 1;
+        let zoomLevel = 100;
+
+        // 从URL获取参数
+        const params = new URLSearchParams(window.location.search);
+        let scoreFile = params.get('file');
+        const scoreTitle = params.get('title');
+
+        console.log('URL Search Params:', window.location.search);
+        console.log('Raw Score File:', scoreFile);
+        console.log('Score Title:', scoreTitle);
+        console.log('Current Protocol:', window.location.protocol);
+
+        // 将相对路径转换为完整 URL（根据当前协议）
+        if (scoreFile && !scoreFile.startsWith('http') && !scoreFile.startsWith('file:')) {
+            if (window.location.protocol === 'file:') {
+                // 文件协议：需要构建完整的 file:// URL
+                // 获取当前 HTML 文件的目录
+                const currentPath = window.location.pathname;
+                const currentDir = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+                // 构建完整的 file:// 路径
+                scoreFile = 'file://' + currentDir + scoreFile;
+            } else {
+                // HTTP 协议：构建完整 URL
+                const baseUrl = window.location.protocol + '//' + window.location.host + '/';
+                scoreFile = baseUrl + scoreFile;
+            }
+            console.log('Converted to full URL:', scoreFile);
+        }
+
+        // 设置标题
+        if (scoreTitle) {
+            document.getElementById('score-title').textContent = scoreTitle;
+        }
+
+        // 加载PDF
+        async function loadPDF() {
+            if (!scoreFile) {
+                console.error('未提供乐谱文件');
+                document.getElementById('pdf-viewer').innerHTML = `
+                    <div class="error-message">
+                        <p>错误：未提供乐谱文件</p>
+                        <p class="text-sm mt-2">请检查URL参数</p>
+                    </div>
+                `;
+                return;
+            }
+
+            console.log('Loading PDF from:', scoreFile);
+
+            try {
+                pdfDoc = await pdfjsLib.getDocument(scoreFile).promise;
+                console.log('PDF loaded successfully, pages:', pdfDoc.numPages);
+                document.getElementById('total-pages').textContent = pdfDoc.numPages;
+                renderPage(1);
+            } catch (error) {
+                console.error('加载PDF失败:', error);
+                document.getElementById('pdf-viewer').innerHTML = `
+                    <div class="error-message">
+                        <p>加载乐谱失败</p>
+                        <p class="text-sm mt-2">${error.message}</p>
+                        <p class="text-sm mt-2">文件路径: ${scoreFile}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 渲染页面
+        async function renderPage(pageNum) {
+            if (!pdfDoc) return;
+
+            if (pageNum < 1 || pageNum > pdfDoc.numPages) {
+                return;
+            }
+
+            currentPage = pageNum;
+            document.getElementById('current-page').textContent = currentPage;
+
+            try {
+                const page = await pdfDoc.getPage(pageNum);
+                const viewport = page.getViewport({ scale: zoomLevel / 100 });
+
+                // 清空容器
+                const viewer = document.getElementById('pdf-viewer');
+                viewer.innerHTML = '';
+
+                // 创建canvas
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                // 创建页面容器
+                const pageContainer = document.createElement('div');
+                pageContainer.className = 'score-page';
+                pageContainer.appendChild(canvas);
+                viewer.appendChild(pageContainer);
+
+                // 渲染页面
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+
+            } catch (error) {
+                console.error('渲染页面失败:', error);
+            }
+        }
+
+        // 事件监听
+        document.getElementById('prev-page-btn').addEventListener('click', () => {
+            if (currentPage > 1) {
+                renderPage(currentPage - 1);
+            }
+        });
+
+        document.getElementById('next-page-btn').addEventListener('click', () => {
+            if (currentPage < pdfDoc.numPages) {
+                renderPage(currentPage + 1);
+            }
+        });
+
+        document.getElementById('zoom-slider').addEventListener('input', (e) => {
+            zoomLevel = parseInt(e.target.value);
+            document.getElementById('zoom-value').textContent = zoomLevel + '%';
+            renderPage(currentPage);
+        });
+
+        document.getElementById('zoom-in-btn').addEventListener('click', () => {
+            const slider = document.getElementById('zoom-slider');
+            zoomLevel = Math.min(300, zoomLevel + 10);
+            slider.value = zoomLevel;
+            document.getElementById('zoom-value').textContent = zoomLevel + '%';
+            renderPage(currentPage);
+        });
+
+        document.getElementById('zoom-out-btn').addEventListener('click', () => {
+            const slider = document.getElementById('zoom-slider');
+            zoomLevel = Math.max(50, zoomLevel - 10);
+            slider.value = zoomLevel;
+            document.getElementById('zoom-value').textContent = zoomLevel + '%';
+            renderPage(currentPage);
+        });
+
+        document.getElementById('fullscreen-btn').addEventListener('click', () => {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            }
+        });
+
+        document.getElementById('download-btn').addEventListener('click', () => {
+            if (scoreFile) {
+                const a = document.createElement('a');
+                a.href = scoreFile;
+                a.download = scoreTitle || 'score.pdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        });
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                document.getElementById('prev-page-btn').click();
+            } else if (e.key === 'ArrowRight') {
+                document.getElementById('next-page-btn').click();
+            }
+        });
+
+        // 初始化
+        loadPDF();
+    </script>
+</body>
+</html>

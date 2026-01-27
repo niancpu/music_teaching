@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐教师音频社区</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Google Sans', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background: #fff;
+            color: #202124;
+        }
+        
+        /* Google 风格按钮 */
+        .btn-primary {
+            background: #1a73e8;
+            color: #fff;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 10px 24px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary:hover {
+            background: #1557b0;
+            box-shadow: 0 1px 3px rgba(60,64,67,0.3), 0 4px 8px rgba(60,64,67,0.15);
+        }
+        
+        .btn-secondary {
+            background: #fff;
+            color: #1a73e8;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 10px 24px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-secondary:hover {
+            background: #f8f9fa;
+            border-color: #1a73e8;
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            transition: box-shadow 0.2s;
+        }
+        .card:hover {
+            box-shadow: 0 1px 3px rgba(60,64,67,0.3), 0 4px 8px rgba(60,64,67,0.15);
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid #dadce0;
+            padding: 12px 24px;
+        }
+        
+        /* 分割线 */
+        .divider {
+            border-top: 1px solid #dadce0;
+        }
+        
+        /* 文字颜色 */
+        .text-primary { color: #202124; }
+        .text-secondary { color: #5f6368; }
+        .text-link { color: #1a73e8; }
+        
+        /* 图标颜色 */
+        .icon-blue { color: #4285f4; }
+        .icon-red { color: #ea4335; }
+        .icon-yellow { color: #fbbc04; }
+        .icon-green { color: #34a853; }
+    </style>
+</head>
+
+<body class="min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="navbar sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-xl font-medium text-primary">
+                <i class="fas fa-music icon-blue"></i>
+                <span>音乐教师音频社区</span>
+            </a>
+            <div class="flex items-center gap-6">
+                <a href="library.html" class="text-secondary hover:text-primary text-sm font-medium">音频库</a>
+                <a href="#courseware" class="text-secondary hover:text-primary text-sm font-medium">课件中心</a>
+                <a href="#creator" class="text-secondary hover:text-primary text-sm font-medium">创作者中心</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主横幅 -->
+    <section class="py-20 px-6">
+        <div class="max-w-3xl mx-auto text-center">
+            <h1 class="text-5xl font-medium text-primary mb-4">音乐教学资源平台</h1>
+            <p class="text-xl text-secondary mb-8">获取高质量教学音频与课件，分享你的创作</p>
+            <div class="flex justify-center gap-4">
+                <a href="#audio-library" class="btn-primary">开始探索</a>
+                <a href="#" class="btn-secondary">了解更多</a>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- 音频库 -->
+    <section id="audio-library" class="py-16 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="mb-8">
+                <h2 class="text-2xl font-medium text-primary mb-2">音频库</h2>
+                <p class="text-secondary">精选管弦乐分轨音频资源</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- 四小天鹅 -->
+                <a href="four-little-swans.html" class="card p-6 block">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-music icon-blue"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-primary mb-1">四小天鹅</h3>
+                            <p class="text-sm text-secondary">柴可夫斯基经典芭蕾舞曲</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 欢乐颂 -->
+                <a href="ode-to-joy.html" class="card p-6 block">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-music icon-red"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-primary mb-1">欢乐颂</h3>
+                            <p class="text-sm text-secondary">贝多芬第九交响曲选段</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 茉莉花 -->
+                <a href="jasmine-flower.html" class="card p-6 block">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-music icon-green"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-primary mb-1">茉莉花</h3>
+                            <p class="text-sm text-secondary">中国民歌经典</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 小小少年 -->
+                <a href="little-hero.html" class="card p-6 block">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-yellow-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-music icon-yellow"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-primary mb-1">小小少年</h3>
+                            <p class="text-sm text-secondary">儿童歌曲</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 那不勒斯舞曲 -->
+                <a href="naples-dance.html" class="card p-6 block">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-music icon-blue"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-primary mb-1">那不勒斯舞曲</h3>
+                            <p class="text-sm text-secondary">柴可夫斯基《天鹅湖》选段</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 送别 -->
+                <a href="#" class="card p-6 block">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-music icon-red"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-primary mb-1">送别</h3>
+                            <p class="text-sm text-secondary">中国近现代经典歌曲</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="mt-8 text-center">
+                <a href="library.html" class="btn-secondary">查看全部音频</a>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- 课件中心 -->
+    <section id="courseware" class="py-16 px-6 bg-gray-50">
+        <div class="max-w-6xl mx-auto">
+            <div class="max-w-2xl">
+                <h2 class="text-2xl font-medium text-primary mb-2">课件中心</h2>
+                <p class="text-secondary mb-6">专业的音乐教学课件，助力课堂教学</p>
+                <a href="#" class="btn-primary">浏览课件</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 创作者中心 -->
+    <section id="creator" class="py-16 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="max-w-2xl">
+                <h2 class="text-2xl font-medium text-primary mb-2">创作者中心</h2>
+                <p class="text-secondary mb-6">上传并分享你的音乐教学资源</p>
+                <a href="#" class="btn-primary">开始创作</a>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- 页脚 -->
+    <footer class="py-8 px-6">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-sm text-secondary">&copy; 2025 音乐教师音频社区</p>
+            <div class="flex gap-6">
+                <a href="#" class="text-sm text-secondary hover:text-primary">帮助</a>
+                <a href="#" class="text-sm text-secondary hover:text-primary">隐私政策</a>
+                <a href="#" class="text-sm text-secondary hover:text-primary">服务条款</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 平滑滚动 -->
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                var target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
