@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI 对话助手</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #f8f9fa;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* 主按钮 - Google 风格 */
+      .btn-primary {
+        background: #fff;
+        color: #1a73e8;
+        border: 1px solid #dadce0;
+       
+        padding: 12px 24px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn-primary:hover {
+        background: #f8f9fa;
+        box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+      }
+
+      .btn-primary:active {
+        background: #e8f0fe;
+      }
+
+      .btn-primary i {
+        font-size: 18px;
+        color: #1a73e8;
+      }
+
+      /* 遮罩层 */
+      .mask {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+      }
+
+      /* details 本体 */
+      #popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: none;
+        z-index: 1000;
+      }
+
+      /* 去掉默认三角 */
+      #popup summary {
+        list-style: none;
+        cursor: pointer;
+      }
+      #popup summary::-webkit-details-marker {
+        display: none;
+      }
+
+      /* 浮窗容器 - Google 风格 */
+      .popup-box {
+        width: 440px;
+        max-width: 90vw;
+        position: relative;
+        z-index: 1;
+        background: #fff;
+        
+        box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15), 0 4px 8px rgba(60, 64, 67, 0.15);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* 浮窗头部 */
+      .popup-header {
+        background: #fff;
+        color: #202124;
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e8eaed;
+      }
+
+      .popup-header h3 {
+        font-size: 16px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #202124;
+      }
+
+      .popup-header h3 i {
+        color: #1a73e8;
+        font-size: 20px;
+      }
+
+      .close {
+        cursor: pointer;
+        font-size: 18px;
+        color: #5f6368;
+        background: none;
+        border: none;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background 0.2s;
+      }
+
+      .close:hover {
+        background: #f1f3f4;
+      }
+
+      /* 对话内容区域 */
+      .chat-content {
+        padding: 16px 24px;
+        min-height: 200px;
+        max-height: 320px;
+        overflow-y: auto;
+        background: #fff;
+      }
+
+      /* 消息气泡 */
+      .message {
+        margin-bottom: 16px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .message.user {
+        align-items: flex-end;
+      }
+
+      .message.ai {
+        align-items: flex-start;
+      }
+
+      .message-label {
+        font-size: 12px;
+        color: #5f6368;
+        margin-bottom: 6px;
+        font-weight: 500;
+      }
+
+      .message-bubble {
+        max-width: 85%;
+        padding: 12px 16px;
+        border-radius: 18px;
+        line-height: 1.5;
+        word-wrap: break-word;
+        font-size: 14px;
+      }
+
+      .message.user .message-bubble {
+        background: #1a73e8;
+        color: #fff;
+        border-bottom-right-radius: 4px;
+      }
+
+      .message.ai .message-bubble {
+        background: #f1f3f4;
+        color: #202124;
+        border-bottom-left-radius: 4px;
+      }
+
+      /* 加载动画 */
+      .loading {
+        display: flex;
+        gap: 4px;
+        padding: 12px 16px;
+        background: #f1f3f4;
+        border-radius: 18px;
+        border-bottom-left-radius: 4px;
+      }
+
+      .loading span {
+        width: 8px;
+        height: 8px;
+        background: #5f6368;
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+      }
+
+      .loading span:nth-child(1) { animation-delay: -0.32s; }
+      .loading span:nth-child(2) { animation-delay: -0.16s; }
+      .loading span:nth-child(3) { animation-delay: 0s; }
+
+      @keyframes bounce {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
+      }
+
+      /* 欢迎提示 */
+      .welcome-message {
+        text-align: center;
+        color: #5f6368;
+        padding: 32px 20px;
+      }
+
+      .welcome-message i {
+        font-size: 40px;
+        color: #1a73e8;
+        margin-bottom: 12px;
+        display: block;
+      }
+
+      .welcome-message p {
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      /* 输入区域 */
+      .input-area {
+        padding: 16px 24px;
+        background: #fff;
+        border-top: 1px solid #e8eaed;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .input-area input {
+        flex: 1;
+        padding: 12px 16px;
+        border: 1px solid #dadce0;
+        border-radius: 24px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        background: #fff;
+        color: #202124;
+      }
+
+      .input-area input:focus {
+        border-color: #1a73e8;
+        box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+      }
+
+      .input-area input::placeholder {
+        color: #9aa0a6;
+      }
+
+      .btn-send {
+        background: #1a73e8;
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .btn-send:hover {
+        background: #1557b0;
+        box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+      }
+
+      .btn-send:disabled {
+        background: #dadce0;
+        cursor: not-allowed;
+      }
+
+      .btn-send i {
+        font-size: 16px;
+      }
+
+      /* 滚动条样式 */
+      .chat-content::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .chat-content::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .chat-content::-webkit-scrollbar-thumb {
+        background: #dadce0;
+        border-radius: 4px;
+      }
+
+      .chat-content::-webkit-scrollbar-thumb:hover {
+        background: #bdc1c6;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- 主按钮 -->
+    <button class="btn-primary" onclick="openPopup()">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      与晴子对话
+    </button>
+
+    <!-- 浮窗 -->
+    <details id="popup">
+      <summary></summary>
+      <div class="mask" onclick="closePopup(event)"></div>
+      <div class="popup-box">
+        <!-- 头部 -->
+        <div class="popup-header">
+          <h3>
+            <i class="fa-solid fa-robot"></i>
+            AI 助手 - 晴子
+          </h3>
+          <button class="close" onclick="closePopup(event)">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- 对话内容 -->
+        <div class="chat-content" id="chat-content">
+          <div class="welcome-message">
+            <i class="fa-solid fa-comments"></i>
+            <p>你好！我是晴子，有什么可以帮助你的吗？</p>
+          </div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="input-area">
+          <input 
+            type="text" 
+            id="user-input" 
+            placeholder="输入你的问题..." 
+            onkeypress="handleKeyPress(event)"
+          >
+          <button class="btn-send" id="send-btn" onclick="sendMessage()">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </details>
+
+    <script>
+      function openPopup() {
+        document.getElementById("popup").open = true;
+        setTimeout(() => {
+          document.getElementById("user-input").focus();
+        }, 100);
+      }
+
+      function closePopup(event) {
+        event.stopPropagation();
+        document.getElementById("popup").open = false;
+      }
+
+      function handleKeyPress(event) {
+        if (event.key === "Enter") {
+          sendMessage();
+        }
+      }
+
+      async function sendMessage() {
+        const input = document.getElementById("user-input");
+        const sendBtn = document.getElementById("send-btn");
+        const chatContent = document.getElementById("chat-content");
+        const message = input.value.trim();
+
+        if (!message) return;
+
+        input.value = "";
+        chatContent.innerHTML = "";
+
+        chatContent.innerHTML += `
+          <div class="message user">
+            <span class="message-label">你</span>
+            <div class="message-bubble">${escapeHtml(message)}</div>
+          </div>
+        `;
+
+        chatContent.innerHTML += `
+          <div class="message ai" id="loading-message">
+            <span class="message-label">晴子</span>
+            <div class="loading">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        `;
+
+        chatContent.scrollTop = chatContent.scrollHeight;
+        sendBtn.disabled = true;
+
+        try {
+          const response = await fetch("http://127.0.0.1:5000/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message: message })
+          });
+
+          const data = await response.json();
+          document.getElementById("loading-message").remove();
+
+          chatContent.innerHTML += `
+            <div class="message ai">
+              <span class="message-label">晴子</span>
+              <div class="message-bubble">${escapeHtml(data.reply)}</div>
+            </div>
+          `;
+
+        } catch (error) {
+          document.getElementById("loading-message").remove();
+
+          chatContent.innerHTML += `
+            <div class="message ai">
+              <span class="message-label">系统</span>
+              <div class="message-bubble" style="background: #fce8e6; color: #c5221f;">
+                请求失败：${escapeHtml(error.message)}<br>
+                请确保服务器已启动
+              </div>
+            </div>
+          `;
+        }
+
+        sendBtn.disabled = false;
+        chatContent.scrollTop = chatContent.scrollHeight;
+        input.focus();
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+    </script>
+  </body>
+</html>
