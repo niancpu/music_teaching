@@ -1,12 +1,32 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
+from flask_cors import CORS
 import requests
 import urllib3
+import os
 from config import MODEL, BASE_URL, API_KEY
 
 # 禁用 SSL 警告（仅用于测试）
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+# 获取当前脚本所在目录
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})  # 启用 CORS 支持，允许所有来源
+
+
+@app.route("/")
+def index():
+    html_path = os.path.join(BASE_DIR, 'ode-to-joy.html')
+    print(f"[DEBUG] 尝试读取文件: {html_path}")
+    print(f"[DEBUG] 文件是否存在: {os.path.exists(html_path)}")
+    
+    if os.path.exists(html_path):
+        with open(html_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        return Response(content, mimetype='text/html')
+    else:
+        return f"文件不存在: {html_path}", 404
 
 
 @app.route("/chat", methods=["POST"])
@@ -21,18 +41,13 @@ def chat():
 
 def generate_reply(
     user_text: str,
-    system_prompt: str = "你是一个友好、自然的中文数字人助手，名字叫晴子。"
+    system_prompt: str = "数字人助手"
 ) -> str:
     """
     通用 AI Chat API HTTP 调用模板
     适配 99% Chat / Completion 类模型
     """
-    # 先检查简单问候，避免不必要的 API 调用
-    if "你好" in user_text:
-        return "你好，我的名字叫晴子，很高兴见到你！"
-    elif "你是谁" in user_text:
-        return "我的名字叫晴子，是一个ai数字人捏"
-
+   
     # 其他情况调用 AI API
     url = f"{BASE_URL}/chat/completions"
 
@@ -72,4 +87,4 @@ def generate_reply(
 
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(port=5002, debug=True)
