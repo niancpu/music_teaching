@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #202124;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-noto-sans-sc), -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Custom audio player styling */
+audio {
+  border-radius: 4px;
+}
+
+audio::-webkit-media-controls-panel {
+  background: #f8f9fa;
+}
+
+/* Dialog styling */
+dialog {
+  border: none;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}

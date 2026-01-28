@@ -1,0 +1,133 @@
+{
+  "songs": [
+    {
+      "slug": "ode-to-joy",
+      "title": "欢乐颂",
+      "composer": "贝多芬",
+      "description": "贝多芬第九交响曲选段 · 完整管弦乐分轨音频",
+      "category": "classical",
+      "icon": "Music",
+      "iconColor": "red",
+      "totalAudio": "/audio/欢乐颂总音频.mp3",
+      "totalScore": "/scores/欢乐颂总谱.pdf",
+      "tracks": [
+        {
+          "id": "flute",
+          "name": "长笛",
+          "section": "木管声部",
+          "icon": "Wind",
+          "audioFile": "/audio/欢乐颂长笛.mp3",
+          "scoreFile": "/scores/欢乐颂长笛分谱.pdf"
+        },
+        {
+          "id": "oboe",
+          "name": "双簧管",
+          "section": "木管声部",
+          "icon": "Wind",
+          "audioFile": "/audio/欢乐颂双簧管.mp3",
+          "scoreFile": "/scores/欢乐颂双簧管分谱.pdf"
+        },
+        {
+          "id": "clarinet",
+          "name": "Bb调单簧管",
+          "section": "木管声部",
+          "icon": "Wind",
+          "audioFile": "/audio/欢乐颂Bb调单簧管.mp3",
+          "scoreFile": "/scores/欢乐颂Bb调单簧管分谱.pdf"
+        },
+        {
+          "id": "bassoon",
+          "name": "大管",
+          "section": "木管声部",
+          "icon": "Wind",
+          "audioFile": "/audio/欢乐颂大管.mp3",
+          "scoreFile": "/scores/欢乐颂大管分谱.pdf"
+        },
+        {
+          "id": "violin1",
+          "name": "小提琴 I",
+          "section": "弦乐声部",
+          "icon": "Music",
+          "audioFile": "/audio/欢乐颂小提琴1.mp3",
+          "scoreFile": "/scores/欢乐颂小提琴Ⅰ分谱.pdf"
+        },
+        {
+          "id": "violin2",
+          "name": "小提琴 II",
+          "section": "弦乐声部",
+          "icon": "Music",
+          "audioFile": "/audio/欢乐颂小提琴2.mp3",
+          "scoreFile": "/scores/欢乐颂小提琴Ⅱ分谱.pdf"
+        },
+        {
+          "id": "viola",
+          "name": "中提琴",
+          "section": "弦乐声部",
+          "icon": "Music",
+          "audioFile": "/audio/欢乐颂中提琴.mp3",
+          "scoreFile": "/scores/欢乐颂中提琴分谱.pdf"
+        },
+        {
+          "id": "cello",
+          "name": "大提琴",
+          "section": "弦乐声部",
+          "icon": "Music",
+          "audioFile": "/audio/欢乐颂大提琴.mp3",
+          "scoreFile": "/scores/欢乐颂大提琴分谱.pdf"
+        },
+        {
+          "id": "bass",
+          "name": "低音提琴",
+          "section": "弦乐声部",
+          "icon": "Music",
+          "audioFile": "/audio/欢乐颂低音提琴.mp3",
+          "scoreFile": "/scores/欢乐颂低音提琴分谱.pdf"
+        }
+      ]
+    },
+    {
+      "slug": "four-little-swans",
+      "title": "四小天鹅",
+      "composer": "柴可夫斯基",
+      "description": "芭蕾舞曲《天鹅湖》选段",
+      "category": "classical",
+      "icon": "Feather",
+      "iconColor": "blue",
+      "totalAudio": "/audio/four-little-swans.mp3",
+      "tracks": []
+    },
+    {
+      "slug": "jasmine-flower",
+      "title": "茉莉花",
+      "composer": "中国民歌",
+      "description": "中国民歌经典",
+      "category": "folk",
+      "icon": "Leaf",
+      "iconColor": "green",
+      "totalAudio": "/audio/jasmine-flower.mp3",
+      "tracks": []
+    },
+    {
+      "slug": "little-hero",
+      "title": "小小少年",
+      "composer": "中国儿歌",
+      "description": "儿童歌曲",
+      "category": "folk",
+      "icon": "Baby",
+      "iconColor": "yellow",
+      "totalAudio": "/audio/little-hero.mp3",
+      "tracks": []
+    },
+    {
+      "slug": "naples-dance",
+      "title": "那不勒斯舞曲",
+      "composer": "柴可夫斯基",
+      "description": "《天鹅湖》选段",
+      "category": "classical",
+      "icon": "Music",
+      "iconColor": "blue",
+      "totalAudio": "/audio/naples-dance.mp3",
+      "tracks": []
+    }
+  ]
+}
