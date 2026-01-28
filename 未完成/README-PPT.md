@@ -23,7 +23,9 @@ pip install -r requirements.txt
 python3 ppt_generator.py
 ```
 
-4. 在浏览器打开你的站点（或本地文件），在 `index.html` 中点击“生成PPT”按钮，服务会返回生成的 PPTX 文件。
+4. 在浏览器打开你的站点（Next.js 前端），在首页点击“生成PPT”按钮，服务会返回生成的 PPTX 文件。
+
+> 说明：根目录静态 HTML 页面已移除，请统一通过前端应用入口访问。
 
 文件与位置：
 - `ppt_generator.py`：后端 Flask 接口实现，读取 `songs/<song>.json`。
@@ -70,4 +72,3 @@ docker compose logs -f nginx
 ```bash
 docker compose down --volumes --remove-orphans
 ```
-
