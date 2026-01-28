@@ -1,0 +1,35 @@
+{#
+  AI 助手弹窗组件
+  
+  使用方法:
+  {% from 'components/ai-chat.html' import ai_chat_popup %}
+  {{ ai_chat_popup() }}
+  
+  需要引入:
+  - static/css/chat.css
+  - static/js/chat.js
+#}
+
+{% macro ai_chat_popup() %}
+<!-- AI助手弹窗 -->
+<details id="popup">
+    <summary></summary>
+    <div class="mask" onclick="closePopup()"></div>
+    <div class="popup-box">
+        <div class="popup-header">
+            <h3><i class="fa-solid fa-robot"></i>AI 助手</h3>
+            <button class="close" onclick="closePopup()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="chat-content" id="chatContent">
+            <div class="welcome-message">
+                <i class="fa-solid fa-comments"></i>
+                <p>你好！我是AI音乐助手，可以帮你分析这首曲目。</p>
+            </div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="输入你的问题...">
+            <button class="btn-send" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+</details>
+{% endmacro %}

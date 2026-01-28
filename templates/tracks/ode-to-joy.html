@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+
+{% block title %}欢乐颂 - 音乐教学平台{% endblock %}
+
+{% block extra_css %}
+    <link href="{{ url_for('static', filename='css/chat.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <!-- AI助手弹窗 -->
+    <details id="popup">
+        <summary></summary>
+        <div class="mask" onclick="closePopup()"></div>
+        <div class="popup-box">
+            <div class="popup-header">
+                <h3><i class="fa-solid fa-robot"></i>AI 助手</h3>
+                <button class="close" onclick="closePopup()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="chat-content" id="chatContent">
+                <div class="welcome-message">
+                    <i class="fa-solid fa-comments"></i>
+                    <p>你好！我是AI音乐助手，可以帮你分析这首曲目。</p>
+                </div>
+            </div>
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="输入你的问题...">
+                <button class="btn-send" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </details>
+
+    <main class="max-w-5xl mx-auto px-6 py-8">
+        <!-- 页面标题 -->
+        <div class="mb-8">
+            <div class="flex items-center gap-2 text-sm mb-4 text-secondary">
+                <a href="{{ url_for('index') }}" class="hover:underline">首页</a>
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+                <span class="text-primary">欢乐颂</span>
+            </div>
+            <h1 class="text-3xl font-medium mb-2 text-primary">欢乐颂</h1>
+            <p class="text-base text-secondary">贝多芬第九交响曲选段 · 完整管弦乐分轨音频</p>
+        </div>
+
+        <!-- 控制面板 -->
+        <div class="track-card p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-medium text-primary">播放控制</h2>
+                <span class="status-tag ready"><i class="fa-solid fa-circle text-xs"></i>就绪</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="btn-primary" onclick="playAll()"><i class="fa-solid fa-play mr-2"></i>全部播放</button>
+                <button class="btn-secondary" onclick="pauseAll()"><i class="fa-solid fa-pause mr-2"></i>暂停</button>
+                <button class="btn-secondary" onclick="restartAll()"><i class="fa-solid fa-rotate-right mr-2"></i>重新开始</button>
+            </div>
+        </div>
+
+        <!-- 总音频 -->
+        <div class="track-card p-6 mb-4">
+            <div class="flex items-start gap-4">
+                <div class="icon-circle"><i class="fa-solid fa-compact-disc"></i></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-medium text-base mb-1 text-primary">总音频</h3>
+                            <p class="text-sm text-secondary">完整混音版本</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="btn-secondary text-sm" onclick="openScoreViewer('{{ url_for('static', filename='../assets/scores/欢乐颂总谱.pdf') }}', '欢乐颂 - 总谱')">
+                                <i class="fa-solid fa-file-lines mr-1"></i>总谱
+                            </button>
+                            <button class="btn-secondary text-sm" onclick="openPopup()">
+                                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>AI分析
+                            </button>
+                        </div>
+                    </div>
+                    <audio id="total-audio" controls src="{{ url_for('assets', filename='audio/欢乐颂总音频.mp3') }}"></audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- 木管声部 -->
+        <h2 class="text-lg font-medium mb-4 mt-8 text-primary">木管声部</h2>
+        
+        <!-- 长笛 -->
+        <div class="track-card p-6 mb-4">
+            <div class="flex items-start gap-4">
+                <div class="icon-circle"><i class="fa-solid fa-wind"></i></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-medium text-base mb-1 text-primary">长笛</h3>
+                            <p class="text-sm text-secondary">木管声部</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-volume-low text-sm text-secondary"></i>
+                                <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1" oninput="setVolume('flute-audio', this.value)">
+                            </div>
+                            <button class="btn-secondary text-sm" onclick="openScoreViewer('{{ url_for('assets', filename='scores/欢乐颂长笛分谱.pdf') }}', '欢乐颂 - 长笛分谱')">
+                                <i class="fa-solid fa-file-lines mr-1"></i>乐谱
+                            </button>
+                        </div>
+                    </div>
+                    <audio id="flute-audio" controls src="{{ url_for('assets', filename='audio/欢乐颂长笛.mp3') }}"></audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- 双簧管 -->
+        <div class="track-card p-6 mb-4">
+            <div class="flex items-start gap-4">
+                <div class="icon-circle"><i class="fa-solid fa-wind"></i></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-medium text-base mb-1 text-primary">双簧管</h3>
+                            <p class="text-sm text-secondary">木管声部</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-volume-low text-sm text-secondary"></i>
+                                <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1" oninput="setVolume('oboe-audio', this.value)">
+                            </div>
+                            <button class="btn-secondary text-sm" onclick="openScoreViewer('{{ url_for('assets', filename='scores/欢乐颂双簧管分谱.pdf') }}', '欢乐颂 - 双簧管分谱')">
+                                <i class="fa-solid fa-file-lines mr-1"></i>乐谱
+                            </button>
+                        </div>
+                    </div>
+                    <audio id="oboe-audio" controls src="{{ url_for('assets', filename='audio/欢乐颂双簧管.mp3') }}"></audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bb调单簧管 -->
+        <div class="track-card p-6 mb-4">
+            <div class="flex items-start gap-4">
+                <div class="icon-circle"><i class="fa-solid fa-wind"></i></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-medium text-base mb-1 text-primary">Bb调单簧管</h3>
+                            <p class="text-sm text-secondary">木管声部</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-volume-low text-sm text-secondary"></i>
+                                <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1" oninput="setVolume('clarinet-audio', this.value)">
+                            </div>
+                            <button class="btn-secondary text-sm" onclick="openScoreViewer('{{ url_for('assets', filename='scores/欢乐颂Bb调单簧管分谱.pdf') }}', '欢乐颂 - Bb调单簧管分谱')">
+                                <i class="fa-solid fa-file-lines mr-1"></i>乐谱
+                            </button>
+                        </div>
+                    </div>
+                    <audio id="clarinet-audio" controls src="{{ url_for('assets', filename='audio/欢乐颂Bb调单簧管.mp3') }}"></audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- 大管 -->
+        <div class="track-card p-6 mb-4">
+            <div class="flex items-start gap-4">
+                <div class="icon-circle"><i class="fa-solid fa-wind"></i></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-medium text-base mb-1 text-primary">大管</h3>
+                            <p class="text-sm text-secondary">木管声部</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-volume-low text-sm text-secondary"></i>
+                                <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1" oninput="setVolume('bassoon-audio', this.value)">
+                            </div>
+                            <button class="btn-secondary text-sm" onclick="openScoreViewer('{{ url_for('assets', filename='scores/欢乐颂大管分谱.pdf') }}', '欢乐颂 - 大管分谱')">
+                                <i class="fa-solid fa-file-lines mr-1"></i>乐谱
+                            </button>
+                        </div>
+                    </div>
+                    <audio id="bassoon-audio" controls src="{{ url_for('assets', filename='audio/欢乐颂大管.mp3') }}"></audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- 弦乐声部 -->
+        <h2 class="text-lg font-medium mb-4 mt-8 text-primary">弦乐声部</h2>
+
+        <!-- 小提琴 I -->
+        <div class="track-card p-6 mb-4">
+            <div class="flex items-start gap-4">
+                <div class="icon-circle"><i class="fa-solid fa-music"></i></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-medium text-base mb-1 text-primary">小提琴 I</h3>
+                            <p class="text-sm text-secondary">弦乐声部</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-volume-low text-sm text-secondary"></i>
+                                <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1" oninput="setVolume('violin1-audio', this.value)">
+                            </div>
+                            <button class="btn-secondary text-sm" onclick="openScoreViewer('{{ url_for('assets', filename='scores/欢乐颂小提琴Ⅰ分谱.pdf') }}', '欢乐颂 - 小提琴I分谱')">
+                                <i class="fa-solid fa-file-lines mr-1"></i>乐谱
+                            </button>
+                        </div>
+                    </div>
+                    <audio id="violin1-audio" controls src="{{ url_for('assets', filename='audio/欢乐颂小提琴1.mp3') }}"></audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- 小提琴 II -->
+        <div class="track-card p-6 mb-4">
+            <div class="flex items-start gap-4">
+                <div class="icon-circle"><i class="fa-solid fa-music"></i></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-medium text-base mb-1 text-primary">小提琴 II</h3>
+                            <p class="text-sm text-secondary">弦乐声部</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-volume-low text-sm text-secondary"></i>
+                                <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1" oninput="setVolume('violin2-audio', this.value)">
+                            </div>
+                            <button class="btn-secondary text-sm" onclick="openScoreViewer('{{ url_for('assets', filename='scores/欢乐颂小提琴Ⅱ分谱.pdf') }}', '欢乐颂 - 小提琴II分谱')">
+                                <i class="fa-solid fa-file-lines mr-1"></i>乐谱
+                            </button>
+                        </div>
+                    </div>
+                    <audio id="violin2-audio" controls src="{{ url_for('assets', filename='audio/欢乐颂小提琴2.mp3') }}"></audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中提琴 -->
+        <div class="track-card p-6 mb-4">
+            <div class="flex items-start gap-4">
+                <div class="icon-circle"><i class="fa-solid fa-music"></i></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-medium text-base mb-1 text-primary">中提琴</h3>
+                            <p class="text-sm text-secondary">弦乐声部</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-volume-low text-sm text-secondary"></i>
+                                <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1" oninput="setVolume('viola-audio', this.value)">
+                            </div>
+                            <button class="btn-secondary text-sm" onclick="openScoreViewer('{{ url_for('assets', filename='scores/欢乐颂中提琴分谱.pdf') }}', '欢乐颂 - 中提琴分谱')">
+                                <i class="fa-solid fa-file-lines mr-1"></i>乐谱
+                            </button>
+                        </div>
+                    </div>
+                    <audio id="viola-audio" controls src="{{ url_for('assets', filename='audio/欢乐颂中提琴.mp3') }}"></audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- 大提琴 -->
+        <div class="track-card p-6 mb-4">
+            <div class="flex items-start gap-4">
+                <div class="icon-circle"><i class="fa-solid fa-music"></i></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-medium text-base mb-1 text-primary">大提琴</h3>
+                            <p class="text-sm text-secondary">弦乐声部</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-volume-low text-sm text-secondary"></i>
+                                <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1" oninput="setVolume('cello-audio', this.value)">
+                            </div>
+                            <button class="btn-secondary text-sm" onclick="openScoreViewer('{{ url_for('assets', filename='scores/欢乐颂大提琴分谱.pdf') }}', '欢乐颂 - 大提琴分谱')">
+                                <i class="fa-solid fa-file-lines mr-1"></i>乐谱
+                            </button>
+                        </div>
+                    </div>
+                    <audio id="cello-audio" controls src="{{ url_for('assets', filename='audio/欢乐颂大提琴.mp3') }}"></audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- 低音提琴 -->
+        <div class="track-card p-6 mb-4">
+            <div class="flex items-start gap-4">
+                <div class="icon-circle"><i class="fa-solid fa-music"></i></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-medium text-base mb-1 text-primary">低音提琴</h3>
+                            <p class="text-sm text-secondary">弦乐声部</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-volume-low text-sm text-secondary"></i>
+                                <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1" oninput="setVolume('bass-audio', this.value)">
+                            </div>
+                            <button class="btn-secondary text-sm" onclick="openScoreViewer('{{ url_for('assets', filename='scores/欢乐颂低音提琴分谱.pdf') }}', '欢乐颂 - 低音提琴分谱')">
+                                <i class="fa-solid fa-file-lines mr-1"></i>乐谱
+                            </button>
+                        </div>
+                    </div>
+                    <audio id="bass-audio" controls src="{{ url_for('assets', filename='audio/欢乐颂低音提琴.mp3') }}"></audio>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 弹窗：乐谱 -->
+    <dialog id="score-dialog">
+        <div class="dialog-header">
+            <h3 id="score-title" class="font-medium text-lg text-primary">乐谱</h3>
+            <button class="btn-icon" onclick="closeScoreViewer()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="dialog-body">
+            <iframe id="score-frame"></iframe>
+        </div>
+    </dialog>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/track-player.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    <script>
+        // 初始化音轨播放器
+        initTrackPlayer(['total-audio', 'flute-audio', 'oboe-audio', 'clarinet-audio', 'bassoon-audio', 'violin1-audio', 'violin2-audio', 'viola-audio', 'cello-audio', 'bass-audio']);
+
+        // 乐谱查看器
+        function openScoreViewer(pdfUrl, title) {
+            var dialog = document.getElementById('score-dialog');
+            var titleEl = document.getElementById('score-title');
+            var frame = document.getElementById('score-frame');
+            
+            if (titleEl) titleEl.textContent = title || '乐谱';
+            if (frame) frame.src = pdfUrl;
+            if (dialog) dialog.showModal();
+        }
+
+        function closeScoreViewer() {
+            var dialog = document.getElementById('score-dialog');
+            var frame = document.getElementById('score-frame');
+            
+            if (frame) frame.src = '';
+            if (dialog) dialog.close();
+        }
+    </script>
+{% endblock %}

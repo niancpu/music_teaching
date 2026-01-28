@@ -1,0 +1,25 @@
+{#
+  播放控制面板组件
+  
+  使用方法:
+  {% from 'components/player-controls.html' import player_controls %}
+  {{ player_controls() }}
+  
+  需要引入:
+  - static/js/track-player.js
+#}
+
+{% macro player_controls() %}
+<!-- 控制面板 -->
+<div class="track-card p-6 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-medium text-primary">播放控制</h2>
+        <span class="status-tag ready"><i class="fa-solid fa-circle text-xs"></i>就绪</span>
+    </div>
+    <div class="flex items-center gap-4">
+        <button class="btn-primary" onclick="playAll()"><i class="fa-solid fa-play mr-2"></i>全部播放</button>
+        <button class="btn-secondary" onclick="pauseAll()"><i class="fa-solid fa-pause mr-2"></i>暂停</button>
+        <button class="btn-secondary" onclick="restartAll()"><i class="fa-solid fa-rotate-right mr-2"></i>重新开始</button>
+    </div>
+</div>
+{% endmacro %}

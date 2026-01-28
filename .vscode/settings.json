@@ -1,3 +1,17 @@
 {
-  "liveServer.settings.port": 5501
+    // 为 Jinja2 模板文件关联正确的语言模式
+    "files.associations": {
+        "*.html": "jinja-html"
+    },
+    
+    // 禁用 HTML 文件中的 JavaScript 验证（因为 Jinja2 语法会被误报）
+    "html.validate.scripts": false,
+    
+    // 禁用 HTML 验证
+    "html.validate.styles": false,
+    
+    // Emmet 支持 Jinja
+    "emmet.includeLanguages": {
+        "jinja-html": "html"
+    }
 }

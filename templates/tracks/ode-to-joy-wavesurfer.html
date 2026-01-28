@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}欢乐颂 (波形版) - 音乐教学平台{% endblock %}
+
+{% block extra_css %}
+    <link href="{{ url_for('static', filename='css/wavesurfer.css') }}" rel="stylesheet">
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+{% endblock %}
+
+{% block content %}
+    <main class="max-w-5xl mx-auto px-6 py-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-medium text-primary mb-2">欢乐颂</h1>
+            <p class="text-secondary mb-4">贝多芬第九交响曲选段 · 波形可视化版本</p>
+            <button id="full-score-btn" class="btn-secondary">
+                <i class="fas fa-file-pdf"></i>查看总谱
+            </button>
+        </div>
+
+        <div class="control-panel mb-6">
+            <button class="btn-primary" id="play-all-btn"><i class="fas fa-play"></i>播放全部</button>
+            <button class="btn-secondary" id="pause-all-btn"><i class="fas fa-pause"></i>暂停</button>
+            <button class="btn-secondary" id="restart-all-btn"><i class="fas fa-redo"></i>重新开始</button>
+            <span id="play-status" class="status-badge status-paused">已暂停</span>
+        </div>
+
+        <div class="space-y-2">
+            <!-- 长笛 -->
+            <div class="audio-track">
+                <div class="track-header">
+                    <div class="track-title">
+                        <div class="track-icon"><i class="fas fa-wind"></i></div>
+                        <span>长笛</span>
+                    </div>
+                    <div class="track-controls">
+                        <div class="volume-control">
+                            <i class="fas fa-volume-up"></i>
+                            <input type="range" id="flute-volume" min="0" max="1" step="0.05" value="1">
+                        </div>
+                        <button class="btn-secondary" id="flute-score-btn"><i class="fas fa-file-pdf"></i>乐谱</button>
+                    </div>
+                </div>
+                <div class="waveform-container" id="flute-waveform"></div>
+            </div>
+
+            <!-- 双簧管 -->
+            <div class="audio-track">
+                <div class="track-header">
+                    <div class="track-title">
+                        <div class="track-icon"><i class="fas fa-wind"></i></div>
+                        <span>双簧管</span>
+                    </div>
+                    <div class="track-controls">
+                        <div class="volume-control">
+                            <i class="fas fa-volume-up"></i>
+                            <input type="range" id="oboe-volume" min="0" max="1" step="0.05" value="1">
+                        </div>
+                        <button class="btn-secondary" id="oboe-score-btn"><i class="fas fa-file-pdf"></i>乐谱</button>
+                    </div>
+                </div>
+                <div class="waveform-container" id="oboe-waveform"></div>
+            </div>
+
+            <!-- Bb调单簧管 -->
+            <div class="audio-track">
+                <div class="track-header">
+                    <div class="track-title">
+                        <div class="track-icon"><i class="fas fa-wind"></i></div>
+                        <span>Bb调单簧管</span>
+                    </div>
+                    <div class="track-controls">
+                        <div class="volume-control">
+                            <i class="fas fa-volume-up"></i>
+                            <input type="range" id="clarinetBb-volume" min="0" max="1" step="0.05" value="1">
+                        </div>
+                        <button class="btn-secondary" id="clarinetBb-score-btn"><i class="fas fa-file-pdf"></i>乐谱</button>
+                    </div>
+                </div>
+                <div class="waveform-container" id="clarinetBb-waveform"></div>
+            </div>
+
+            <!-- 大管 -->
+            <div class="audio-track">
+                <div class="track-header">
+                    <div class="track-title">
+                        <div class="track-icon"><i class="fas fa-wind"></i></div>
+                        <span>大管</span>
+                    </div>
+                    <div class="track-controls">
+                        <div class="volume-control">
+                            <i class="fas fa-volume-up"></i>
+                            <input type="range" id="bassoon-volume" min="0" max="1" step="0.05" value="1">
+                        </div>
+                        <button class="btn-secondary" id="bassoon-score-btn"><i class="fas fa-file-pdf"></i>乐谱</button>
+                    </div>
+                </div>
+                <div class="waveform-container" id="bassoon-waveform"></div>
+            </div>
+
+            <!-- 小提琴 I -->
+            <div class="audio-track">
+                <div class="track-header">
+                    <div class="track-title">
+                        <div class="track-icon"><i class="fas fa-violin"></i></div>
+                        <span>小提琴 I</span>
+                    </div>
+                    <div class="track-controls">
+                        <div class="volume-control">
+                            <i class="fas fa-volume-up"></i>
+                            <input type="range" id="violin1-volume" min="0" max="1" step="0.05" value="1">
+                        </div>
+                        <button class="btn-secondary" id="violin1-score-btn"><i class="fas fa-file-pdf"></i>乐谱</button>
+                    </div>
+                </div>
+                <div class="waveform-container" id="violin1-waveform"></div>
+            </div>
+
+            <!-- 小提琴 II -->
+            <div class="audio-track">
+                <div class="track-header">
+                    <div class="track-title">
+                        <div class="track-icon"><i class="fas fa-violin"></i></div>
+                        <span>小提琴 II</span>
+                    </div>
+                    <div class="track-controls">
+                        <div class="volume-control">
+                            <i class="fas fa-volume-up"></i>
+                            <input type="range" id="violin2-volume" min="0" max="1" step="0.05" value="1">
+                        </div>
+                        <button class="btn-secondary" id="violin2-score-btn"><i class="fas fa-file-pdf"></i>乐谱</button>
+                    </div>
+                </div>
+                <div class="waveform-container" id="violin2-waveform"></div>
+            </div>
+
+            <!-- 中提琴 -->
+            <div class="audio-track">
+                <div class="track-header">
+                    <div class="track-title">
+                        <div class="track-icon"><i class="fas fa-violin"></i></div>
+                        <span>中提琴</span>
+                    </div>
+                    <div class="track-controls">
+                        <div class="volume-control">
+                            <i class="fas fa-volume-up"></i>
+                            <input type="range" id="viola-volume" min="0" max="1" step="0.05" value="1">
+                        </div>
+                        <button class="btn-secondary" id="viola-score-btn"><i class="fas fa-file-pdf"></i>乐谱</button>
+                    </div>
+                </div>
+                <div class="waveform-container" id="viola-waveform"></div>
+            </div>
+
+            <!-- 大提琴 -->
+            <div class="audio-track">
+                <div class="track-header">
+                    <div class="track-title">
+                        <div class="track-icon"><i class="fas fa-violin"></i></div>
+                        <span>大提琴</span>
+                    </div>
+                    <div class="track-controls">
+                        <div class="volume-control">
+                            <i class="fas fa-volume-up"></i>
+                            <input type="range" id="cello-volume" min="0" max="1" step="0.05" value="1">
+                        </div>
+                        <button class="btn-secondary" id="cello-score-btn"><i class="fas fa-file-pdf"></i>乐谱</button>
+                    </div>
+                </div>
+                <div class="waveform-container" id="cello-waveform"></div>
+            </div>
+
+            <!-- 低音提琴 -->
+            <div class="audio-track">
+                <div class="track-header">
+                    <div class="track-title">
+                        <div class="track-icon"><i class="fas fa-violin"></i></div>
+                        <span>低音提琴</span>
+                    </div>
+                    <div class="track-controls">
+                        <div class="volume-control">
+                            <i class="fas fa-volume-up"></i>
+                            <input type="range" id="doubleBass-volume" min="0" max="1" step="0.05" value="1">
+                        </div>
+                        <button class="btn-secondary" id="doubleBass-score-btn"><i class="fas fa-file-pdf"></i>乐谱</button>
+                    </div>
+                </div>
+                <div class="waveform-container" id="doubleBass-waveform"></div>
+            </div>
+        </div>
+    </main>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/wavesurfer-player.js') }}"></script>
+{% endblock %}

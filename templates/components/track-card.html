@@ -1,0 +1,61 @@
+{#
+  音轨卡片组件
+  
+  参数:
+  - track: 音轨对象，包含以下属性:
+    - id: 音轨 ID (用于 audio 元素)
+    - name: 乐器名称
+    - section: 声部名称
+    - icon: Font Awesome 图标类名
+    - audio_src: 音频文件路径
+    - score_src: 乐谱文件路径 (可选)
+    - score_title: 乐谱标题 (可选)
+    - is_main: 是否为主音轨 (可选，显示 AI 分析按钮)
+    - main_score_src: 总谱路径 (可选)
+    - main_score_title: 总谱标题 (可选)
+#}
+
+{% macro render_track(track) %}
+<div class="track-card p-6 mb-4">
+    <div class="flex items-start gap-4">
+        <div class="icon-circle"><i class="fa-solid {{ track.icon }}"></i></div>
+        <div class="flex-1">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <h3 class="font-medium text-base mb-1 text-primary">{{ track.name }}</h3>
+                    <p class="text-sm text-secondary">{{ track.section }}</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    {% if not track.is_main %}
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-volume-low text-sm text-secondary"></i>
+                        <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1" 
+                               oninput="setVolume('{{ track.id }}', this.value)">
+                    </div>
+                    {% endif %}
+                    {% if track.is_main and track.main_score_src %}
+                    <button class="btn-secondary text-sm" 
+                            onclick="openScoreViewer('{{ track.main_score_src }}', '{{ track.main_score_title }}')">
+                        <i class="fa-solid fa-file-lines mr-1"></i>总谱
+                    </button>
+                    <button class="btn-secondary text-sm" onclick="openPopup()">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>AI分析
+                    </button>
+                    {% elif track.score_src %}
+                    <button class="btn-secondary text-sm" 
+                            onclick="openScoreViewer('{{ track.score_src }}', '{{ track.score_title }}')">
+                        <i class="fa-solid fa-file-lines mr-1"></i>乐谱
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            <audio id="{{ track.id }}" controls src="{{ track.audio_src }}"></audio>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+{# 渲染声部标题 #}
+{% macro render_section_title(title) %}
+<h2 class="text-lg font-medium mb-4 mt-8 text-primary">{{ title }}</h2>
+{% endmacro %}
