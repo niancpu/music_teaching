@@ -19,7 +19,7 @@ const colorMap: Record<string, string> = {
   yellow: 'bg-yellow-50 text-yellow-500',
 };
 
-// Extended library data (combining with original library.html data)
+// Extended library data (combining with original static library data)
 const extendedSongs: Song[] = [
   ...songs,
   { slug: 'fur-elise', title: '致爱丽丝', composer: '贝多芬', description: '钢琴独奏', category: 'classical', icon: 'Keyboard', iconColor: 'blue', totalAudio: '', tracks: [] },
