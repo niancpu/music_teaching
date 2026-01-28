@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback, createRef, RefObject } from 'react';
+import { useRef, useState, useCallback, createRef, RefObject, useEffect } from 'react';
 import { Play, Pause, RotateCcw, Disc } from 'lucide-react';
 import type { Song, Track } from '@/types/song';
 import TrackCard from './TrackCard';
@@ -19,9 +19,21 @@ export default function AudioPlayer({ song }: AudioPlayerProps) {
     file: '',
     title: '',
   });
+  const [externalListeningEnabled, setExternalListeningEnabled] = useState(false);
+  const [externalPermission, setExternalPermission] = useState<'unknown' | 'granted' | 'denied'>('unknown');
+  const [isExternalListening, setIsExternalListening] = useState(false);
+  const [isExternalPerforming, setIsExternalPerforming] = useState(false);
 
   const totalAudioRef = useRef<HTMLAudioElement>(null);
   const trackRefs = useRef<Map<string, RefObject<HTMLAudioElement | null>>>(new Map());
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const processorRef = useRef<ScriptProcessorNode | null>(null);
+  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const loudStartRef = useRef<number | null>(null);
+  const quietStartRef = useRef<number | null>(null);
+  const isPerformingRef = useRef(false);
 
   // Initialize refs for tracks
   song.tracks.forEach((track) => {
@@ -73,10 +85,129 @@ export default function AudioPlayer({ song }: AudioPlayerProps) {
     setScoreModal({ open: false, file: '', title: '' });
   }, []);
 
+  const cleanupExternalListening = useCallback(() => {
+    if (processorRef.current) {
+      processorRef.current.disconnect();
+      processorRef.current.onaudioprocess = null;
+      processorRef.current = null;
+    }
+    if (analyserRef.current) {
+      analyserRef.current.disconnect();
+      analyserRef.current = null;
+    }
+    if (sourceRef.current) {
+      sourceRef.current.disconnect();
+      sourceRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+    }
+    loudStartRef.current = null;
+    quietStartRef.current = null;
+    isPerformingRef.current = false;
+    setIsExternalPerforming(false);
+    setIsExternalListening(false);
+  }, []);
+
+  useEffect(() => {
+    if (!externalListeningEnabled) {
+      cleanupExternalListening();
+      return;
+    }
+
+    let isCancelled = false;
+    const START_THRESHOLD = 0.02;
+    const STOP_THRESHOLD = 0.015;
+    const HYSTERESIS_MS = 600;
+
+    const setupExternalListening = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        if (isCancelled) return;
+        setExternalPermission('granted');
+        mediaStreamRef.current = stream;
+
+        const audioContext = new AudioContext();
+        audioContextRef.current = audioContext;
+        await audioContext.resume();
+
+        const source = audioContext.createMediaStreamSource(stream);
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 2048;
+        const processor = audioContext.createScriptProcessor(2048, 1, 1);
+
+        source.connect(analyser);
+        analyser.connect(processor);
+        processor.connect(audioContext.destination);
+
+        sourceRef.current = source;
+        analyserRef.current = analyser;
+        processorRef.current = processor;
+        setIsExternalListening(true);
+
+        processor.onaudioprocess = (event) => {
+          const input = event.inputBuffer.getChannelData(0);
+          let sum = 0;
+          for (let i = 0; i < input.length; i += 1) {
+            sum += input[i] * input[i];
+          }
+          const rms = Math.sqrt(sum / input.length);
+          const now = performance.now();
+
+          if (rms >= START_THRESHOLD) {
+            if (loudStartRef.current === null) {
+              loudStartRef.current = now;
+            }
+            quietStartRef.current = null;
+          } else if (rms <= STOP_THRESHOLD) {
+            if (quietStartRef.current === null) {
+              quietStartRef.current = now;
+            }
+            loudStartRef.current = null;
+          }
+
+          if (!isPerformingRef.current && loudStartRef.current !== null && now - loudStartRef.current >= HYSTERESIS_MS) {
+            isPerformingRef.current = true;
+            setIsExternalPerforming(true);
+            playAll();
+          }
+
+          if (isPerformingRef.current && quietStartRef.current !== null && now - quietStartRef.current >= HYSTERESIS_MS) {
+            isPerformingRef.current = false;
+            setIsExternalPerforming(false);
+            pauseAll();
+          }
+        };
+      } catch (error) {
+        if (isCancelled) return;
+        setExternalPermission('denied');
+        cleanupExternalListening();
+      }
+    };
+
+    setupExternalListening();
+
+    return () => {
+      isCancelled = true;
+      cleanupExternalListening();
+    };
+  }, [cleanupExternalListening, externalListeningEnabled, pauseAll, playAll]);
+
   const statusConfig = {
     ready: { className: 'bg-green-100 text-green-700', text: '就绪' },
     playing: { className: 'bg-blue-100 text-blue-500', text: '播放中' },
     paused: { className: 'bg-gray-100 text-gray-500', text: '已暂停' },
+  };
+
+  const externalPermissionText = {
+    unknown: '未请求权限',
+    granted: '权限已授权',
+    denied: '权限被拒绝',
   };
 
   // Group tracks by section
@@ -119,6 +250,49 @@ export default function AudioPlayer({ song }: AudioPlayerProps) {
             <RotateCcw className="w-4 h-4 mr-2" />
             重新开始
           </button>
+        </div>
+        <div className="mt-6 border-t border-gray-100 pt-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-900">外部演奏监听</p>
+              <p className="text-xs text-gray-500">通过麦克风检测演奏自动播放/暂停</p>
+            </div>
+            <label className="inline-flex items-center gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                className="h-4 w-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                checked={externalListeningEnabled}
+                onChange={(event) => setExternalListeningEnabled(event.target.checked)}
+              />
+              {externalListeningEnabled ? '已开启' : '已关闭'}
+            </label>
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium ${
+                externalPermission === 'granted' ? 'bg-green-100 text-green-700' : externalPermission === 'denied' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'
+              }`}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-current" />
+              {externalPermissionText[externalPermission]}
+            </span>
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium ${
+                isExternalListening ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
+              }`}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-current" />
+              {isExternalListening ? '正在监听' : '未监听'}
+            </span>
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium ${
+                isExternalPerforming ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-600'
+              }`}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-current" />
+              {isExternalPerforming ? '检测到演奏' : '未检测'}
+            </span>
+          </div>
         </div>
       </div>
 
