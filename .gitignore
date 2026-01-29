@@ -34,3 +34,9 @@ npm-debug.log*
 
 # Docker
 .docker/
+
+# Claude IDE
+.claude/
+
+# Windows artifacts
+nul
