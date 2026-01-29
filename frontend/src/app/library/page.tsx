@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Search, Music, Feather, Leaf, Baby, Keyboard, Repeat, Moon, Cloud, Guitar, Drum, Heart, Wind, Waves, User } from 'lucide-react';
+import { getSongs } from '@/lib/api';
 import songsData from '@/data/songs.json';
 import type { Song } from '@/types/song';
 
-const songs = songsData.songs as Song[];
+const staticSongs = songsData.songs as Song[];
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Music, Feather, Leaf, Baby, Keyboard, Repeat, Moon, Cloud, Guitar, Drum, Heart, Wind, Waves, User,
@@ -19,9 +20,8 @@ const colorMap: Record<string, string> = {
   yellow: 'bg-yellow-50 text-yellow-500',
 };
 
-// Extended library data (combining with original static library data)
-const extendedSongs: Song[] = [
-  ...songs,
+// Additional songs for display (coming soon items)
+const additionalSongs: Song[] = [
   { slug: 'fur-elise', title: '致爱丽丝', composer: '贝多芬', description: '钢琴独奏', category: 'classical', icon: 'Keyboard', iconColor: 'blue', totalAudio: '', tracks: [] },
   { slug: 'four-seasons-spring', title: '四季·春', composer: '维瓦尔第', description: '小提琴协奏曲', category: 'classical', icon: 'Music', iconColor: 'green', totalAudio: '', tracks: [] },
   { slug: 'symphony-5', title: '第五交响曲', composer: '贝多芬', description: '交响乐', category: 'classical', icon: 'Music', iconColor: 'red', totalAudio: '', tracks: [] },
@@ -42,16 +42,48 @@ type Category = 'all' | 'classical' | 'folk';
 export default function LibraryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState<Category>('all');
+  const [apiSongs, setApiSongs] = useState<Song[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSongsData() {
+      try {
+        const response = await getSongs();
+        setApiSongs(response.songs);
+      } catch {
+        // Fallback to static data if API fails
+        setApiSongs(staticSongs);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSongsData();
+  }, []);
+
+  // Combine API songs with additional "coming soon" songs
+  const allSongs = useMemo(() => {
+    const apiSlugs = new Set(apiSongs.map(s => s.slug));
+    const uniqueAdditional = additionalSongs.filter(s => !apiSlugs.has(s.slug));
+    return [...apiSongs, ...uniqueAdditional];
+  }, [apiSongs]);
 
   const filteredSongs = useMemo(() => {
-    return extendedSongs.filter((song) => {
+    return allSongs.filter((song) => {
       const matchesSearch = searchTerm === '' ||
         song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         song.composer.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = category === 'all' || song.category === category;
       return matchesSearch && matchesCategory;
     });
-  }, [searchTerm, category]);
+  }, [allSongs, searchTerm, category]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-500">加载中...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">

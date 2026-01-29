@@ -1,11 +1,21 @@
 import Link from 'next/link';
 import SongCard from '@/components/SongCard';
+import { fetchSongs } from '@/lib/api/server';
 import songsData from '@/data/songs.json';
 import type { Song } from '@/types/song';
 
-const songs = songsData.songs as Song[];
+async function getSongs(): Promise<Song[]> {
+  try {
+    const response = await fetchSongs();
+    return response.songs;
+  } catch {
+    // Fallback to static data if API is unavailable
+    return songsData.songs as Song[];
+  }
+}
 
-export default function Home() {
+export default async function Home() {
+  const songs = await getSongs();
   return (
     <div className="min-h-screen">
       {/* Hero Section */}

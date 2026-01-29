@@ -2,24 +2,43 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ChevronRight, Music } from 'lucide-react';
 import AudioPlayer from '@/components/AudioPlayer';
+import { fetchSongBySlug, fetchSongs } from '@/lib/api/server';
 import songsData from '@/data/songs.json';
 import type { Song } from '@/types/song';
 
-const songs = songsData.songs as Song[];
+const staticSongs = songsData.songs as Song[];
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+async function getSong(slug: string): Promise<Song | null> {
+  try {
+    const response = await fetchSongBySlug(slug);
+    return response.song;
+  } catch {
+    // Fallback to static data if API is unavailable
+    return staticSongs.find((s) => s.slug === slug) || null;
+  }
+}
+
 export async function generateStaticParams() {
-  return songs.map((song) => ({
-    slug: song.slug,
-  }));
+  try {
+    const response = await fetchSongs();
+    return response.songs.map((song) => ({
+      slug: song.slug,
+    }));
+  } catch {
+    // Fallback to static data
+    return staticSongs.map((song) => ({
+      slug: song.slug,
+    }));
+  }
 }
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
-  const song = songs.find((s) => s.slug === slug);
+  const song = await getSong(slug);
   if (!song) return { title: '歌曲未找到' };
   return {
     title: `${song.title} - 音乐教学平台`,
@@ -29,7 +48,7 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function SongPage({ params }: PageProps) {
   const { slug } = await params;
-  const song = songs.find((s) => s.slug === slug);
+  const song = await getSong(slug);
 
   if (!song) {
     notFound();
