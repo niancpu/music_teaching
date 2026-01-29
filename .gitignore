@@ -40,3 +40,14 @@ npm-debug.log*
 
 # Windows artifacts
 nul
+
+# Visualization generated files
+backend/data/tasks/*.json
+!backend/data/tasks/.gitkeep
+frontend/public/videos/*.mp4
+!frontend/public/videos/.gitkeep
+remotion/public/data/*.json
+!remotion/public/data/.gitkeep
+remotion/public/audio/
+remotion/node_modules/
+remotion/out/

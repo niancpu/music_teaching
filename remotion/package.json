@@ -1,0 +1,22 @@
+{
+  "name": "music-visualization",
+  "version": "1.0.0",
+  "description": "Music visualization video generator using Remotion",
+  "scripts": {
+    "start": "remotion studio",
+    "build": "remotion render CircularWaveform out/video.mp4",
+    "preview": "remotion preview"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "@remotion/player": "^4.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.3.0"
+  }
+}

@@ -1,4 +1,10 @@
 services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
   frontend:
     build:
       context: ./frontend
@@ -20,9 +26,37 @@ services:
       - AI_BASE_URL=${AI_BASE_URL:-}
       - AI_MODEL=${AI_MODEL:-}
       - CORS_ORIGINS=["http://localhost"]
+      - REDIS_URL=redis://redis:6379/0
+      - IMAGE_API_PROVIDER=${IMAGE_API_PROVIDER:-openai}
+      - OPENAI_IMAGE_API_KEY=${OPENAI_IMAGE_API_KEY:-}
+      - OPENAI_IMAGE_API_URL=${OPENAI_IMAGE_API_URL:-https://api.openai.com/v1}
+      - OPENAI_IMAGE_MODEL=${OPENAI_IMAGE_MODEL:-dall-e-3}
+      - GOOGLE_IMAGE_API_KEY=${GOOGLE_IMAGE_API_KEY:-}
+      - GOOGLE_IMAGE_PROJECT_ID=${GOOGLE_IMAGE_PROJECT_ID:-}
     volumes:
       - ./backend/songs:/app/songs:ro
       - ./frontend/src/data:/app/../frontend/src/data:ro
+    depends_on:
+      - redis
+
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: celery -A app.celery_app worker --loglevel=info
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - IMAGE_API_PROVIDER=${IMAGE_API_PROVIDER:-openai}
+      - OPENAI_IMAGE_API_KEY=${OPENAI_IMAGE_API_KEY:-}
+      - OPENAI_IMAGE_API_URL=${OPENAI_IMAGE_API_URL:-https://api.openai.com/v1}
+      - OPENAI_IMAGE_MODEL=${OPENAI_IMAGE_MODEL:-dall-e-3}
+      - GOOGLE_IMAGE_API_KEY=${GOOGLE_IMAGE_API_KEY:-}
+      - GOOGLE_IMAGE_PROJECT_ID=${GOOGLE_IMAGE_PROJECT_ID:-}
+    volumes:
+      - ./frontend/public/audio:/app/../frontend/public/audio:ro
+    depends_on:
+      - redis
 
   nginx:
     image: nginx:alpine
@@ -34,3 +68,6 @@ services:
       - frontend
       - backend
     restart: unless-stopped
+
+volumes:
+  redis_data:
