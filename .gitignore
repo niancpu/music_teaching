@@ -51,3 +51,9 @@ remotion/public/data/*.json
 remotion/public/audio/
 remotion/node_modules/
 remotion/out/
+
+# 语音模块
+/语音模块/outputs/*
+/语音模块/uploads/*
+!/语音模块/outputs/.gitkeep
+!/语音模块/uploads/.gitkeep
