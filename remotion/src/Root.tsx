@@ -6,7 +6,8 @@ import { Composition, delayRender, continueRender, staticFile } from "remotion";
 import { CircularWaveform } from "./compositions/CircularWaveform";
 import { RadialWaveform } from "./compositions/RadialWaveform";
 import { BarWaveform } from "./compositions/BarWaveform";
-import { AudioAnalysisData, VisualizationProps } from "./types/audio-data";
+import { ParticleBreathing } from "./compositions/ParticleBreathing";
+import { AudioAnalysisData, VisualizationProps, VisualizationPropsSchema } from "./types/audio-data";
 
 // Default props for preview
 const defaultProps: VisualizationProps = {
@@ -76,6 +77,11 @@ const BarWaveformWrapper: React.FC<VisualizationProps> = (props) => {
   return <BarWaveform {...props} data={data} />;
 };
 
+const ParticleBreathingWrapper: React.FC<VisualizationProps> = (props) => {
+  const data = useAudioData(props.dataFile);
+  return <ParticleBreathing {...props} data={data} />;
+};
+
 // Calculate metadata by loading data file
 const calculateMetadata = async ({ props }: { props: VisualizationProps }) => {
   try {
@@ -107,6 +113,7 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+        schema={VisualizationPropsSchema}
         defaultProps={defaultProps}
         calculateMetadata={calculateMetadata}
       />
@@ -118,6 +125,7 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+        schema={VisualizationPropsSchema}
         defaultProps={defaultProps}
         calculateMetadata={calculateMetadata}
       />
@@ -129,6 +137,19 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+        schema={VisualizationPropsSchema}
+        defaultProps={defaultProps}
+        calculateMetadata={calculateMetadata}
+      />
+
+      <Composition
+        id="ParticleBreathing"
+        component={ParticleBreathingWrapper}
+        durationInFrames={300}
+        fps={30}
+        width={1920}
+        height={1080}
+        schema={VisualizationPropsSchema}
         defaultProps={defaultProps}
         calculateMetadata={calculateMetadata}
       />

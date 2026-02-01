@@ -10,6 +10,7 @@ const STYLES = [
   { value: 'circular', label: '圆形波纹 (Circular)' },
   { value: 'radial', label: '放射光束 (Radial)' },
   { value: 'bars', label: '频率柱状图 (Bars)' },
+  { value: 'particle', label: '3D 粒子呼吸 (Particle)' },
 ];
 
 const RESOLUTIONS = [
@@ -31,7 +32,7 @@ export default function VisualizationGenerator() {
   
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null); // null means totalAudio
-  const [style, setStyle] = useState<'circular' | 'radial' | 'bars'>('circular');
+  const [style, setStyle] = useState<'circular' | 'radial' | 'bars' | 'particle'>('circular');
   const [resolution, setResolution] = useState<'720p' | '1080p' | '4k'>('1080p');
   const [colorScheme, setColorScheme] = useState('blue');
   
@@ -293,7 +294,13 @@ export default function VisualizationGenerator() {
           {task.status === 'failed' && (
              <div className="mt-4 p-4 bg-red-50 text-red-700 rounded border border-red-200">
                <p className="font-medium">渲染失败</p>
-               <p className="text-sm mt-1">{task.error || '发生了未知错误。'}</p>
+               <p className="text-sm mt-1">
+                 {typeof task.error === 'string'
+                   ? task.error
+                   : task.error
+                     ? JSON.stringify(task.error)
+                     : '发生了未知错误。'}
+               </p>
              </div>
           )}
         </div>

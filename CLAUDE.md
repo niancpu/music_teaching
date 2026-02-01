@@ -18,11 +18,19 @@ Music Teaching Audio Community Platform (音乐教师音频社区) - A web platf
         │  Frontend (Port 3000)│  │ Backend (Port 8000)│
         │  Next.js + React    │  │ FastAPI + Python  │
         └─────────────────────┘  └───────────────────┘
+                                         │
+                   ┌─────────────────────┼─────────────────────┐
+                   │                     │                     │
+           ┌───────▼───────┐     ┌───────▼───────┐     ┌───────▼───────┐
+           │ Redis + Celery│     │   Remotion    │     │   librosa     │
+           │ (Image Tasks) │     │ (Video Render)│     │(Audio Analysis)│
+           └───────────────┘     └───────────────┘     └───────────────┘
 ```
 
 - **Frontend:** Next.js 16, React 19, TypeScript 5, Tailwind CSS 4
-- **Backend:** FastAPI, Python 3.11, uvicorn, python-pptx
-- **Infrastructure:** Docker Compose, Nginx
+- **Backend:** FastAPI, Python 3.11, uvicorn, Celery, librosa
+- **Remotion:** React-based video rendering with Three.js for 3D visualizations
+- **Infrastructure:** Docker Compose, Nginx, Redis
 
 ## Build & Run Commands
 
@@ -30,14 +38,20 @@ Music Teaching Audio Community Platform (音乐教师音频社区) - A web platf
 
 ```bash
 # Frontend
-cd frontend
-npm install
-npm run dev          # localhost:3000
+cd frontend && npm install && npm run dev    # localhost:3000
 
 # Backend (FastAPI)
-cd backend
-pip install -r requirements.txt
+cd backend && pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
+
+# Celery Worker (required for image generation)
+cd backend && celery -A app.celery_app worker --loglevel=info
+
+# Remotion Studio (for visualization development)
+cd remotion && npm install && npm run start
+
+# Redis (required for Celery)
+redis-server
 ```
 
 ### Production (Docker)
@@ -46,50 +60,85 @@ uvicorn app.main:app --reload --port 8000
 docker-compose up --build    # Runs all services on port 80
 ```
 
-### Frontend Only
+### Linting
 
 ```bash
-cd frontend
-npm run build        # Production build
-npm run start        # Start production server
-npm run lint         # ESLint check
+cd frontend && npm run lint  # ESLint check
 ```
+
+## Remotion Module
+
+The `remotion/` directory contains video composition components for music visualization:
+
+```
+remotion/
+├── src/
+│   ├── Root.tsx                    # Composition registry
+│   ├── compositions/
+│   │   ├── CircularWaveform.tsx    # Circular audio visualization
+│   │   ├── RadialWaveform.tsx      # Radial bars visualization
+│   │   ├── BarWaveform.tsx         # Horizontal bars visualization
+│   │   └── ParticleBreathing.tsx   # 3D particle system (Three.js)
+│   └── types/audio-data.ts         # Audio analysis data types
+└── public/
+    ├── audio/                      # Audio files (copied from frontend)
+    └── data/                       # Analysis JSON files (generated)
+```
+
+**Visualization Workflow:**
+1. Frontend submits render request → `POST /api/v1/visualization/render`
+2. Backend analyzes audio with librosa → saves JSON to `remotion/public/data/`
+3. Backend invokes Remotion CLI → `npx remotion render <Composition>`
+4. Video saved to `frontend/public/videos/` → returned via download endpoint
+
+**Adding New Visualizations:**
+1. Create composition in `remotion/src/compositions/`
+2. Register in `remotion/src/Root.tsx`
+3. Add style mapping in `backend/app/services/render_service.py` (composition_map)
+4. Add option in `frontend/src/components/VisualizationGenerator.tsx`
 
 ## Backend Structure
 
 The backend uses a modular FastAPI architecture under `backend/app/`:
 
-```
-backend/app/
-├── main.py              # FastAPI app factory
-├── config.py            # Settings via pydantic-settings
-├── api/v1/
-│   ├── router.py        # Aggregates all endpoint routers
-│   └── endpoints/       # Route handlers (health, songs, audio, chat, ppt)
-├── core/
-│   ├── security.py      # CORS setup
-│   └── exceptions.py    # Exception handlers
-├── schemas/             # Pydantic models (song, audio, chat, ppt)
-└── services/            # Business logic (song_service, audd_service, ai_service, ppt_service)
-```
+- `main.py` - FastAPI app factory
+- `config.py` - Settings via pydantic-settings
+- `api/v1/endpoints/` - Route handlers
+- `services/` - Business logic (render_service.py orchestrates Remotion)
+- `tasks/` - Celery async tasks
 
-API docs available at `/api/docs` (Swagger) and `/api/redoc`.
+API docs: `/api/docs` (Swagger), `/api/redoc`
 
-Note: `backend/app.py` is a legacy Flask version kept for reference.
+### Async Task Processing
+
+**Image Generation** (Celery + Redis):
+- `POST /api/v1/image-generation/generate` → returns task_id
+- `GET /api/v1/image-generation/status/{task_id}` → poll for results
+
+**Visualization Rendering** (BackgroundTasks):
+- `POST /api/v1/visualization/render` → returns task_id
+- `GET /api/v1/visualization/status/{task_id}` → check status
+- `GET /api/v1/visualization/download/{task_id}` → download video
+
+## Frontend API Client
+
+The frontend uses a typed API client layer in `frontend/src/lib/api/`:
+
+- `client.ts` - Fetch wrapper with `APIResponse<T>` handling and `APIError` class
+- `endpoints/` - Domain-specific API functions (songs, chat, visualization, etc.)
+- `hooks/` - React hooks for data fetching (useSongs, useChat)
 
 ## Key Frontend Components
 
-- **`components/AudioPlayer.tsx`** - Multi-track player with:
-  - Synchronized playback across all tracks
-  - Individual volume controls per track
-  - External performance listening via Web Audio API (microphone detection)
-  - RMS audio level analysis with hysteresis-based state management (START_THRESHOLD=0.02, STOP_THRESHOLD=0.015, HYSTERESIS_MS=600)
-- **`components/ScoreViewer.tsx`** - Modal PDF score viewer using react-pdf
-- **`app/songs/[slug]/page.tsx`** - Dynamic song detail pages (statically generated)
+- **`AudioPlayer.tsx`** - Multi-track synchronized playback with microphone detection (RMS analysis, hysteresis thresholds)
+- **`VisualizationGenerator.tsx`** - Video generation UI with style/resolution selection
+- **`ImageGenerator.tsx`** - Audio-to-image generation with style presets
+- **`ScoreViewer.tsx`** - PDF viewer using react-pdf
+- **`VoiceChat.tsx`** - Voice conversation interface
 
 ## Data Model
 
-Songs are defined in `frontend/src/data/songs.json`:
+Songs defined in `frontend/src/data/songs.json`:
 
 ```typescript
 interface Song {
@@ -99,27 +148,24 @@ interface Song {
   category: 'classical' | 'folk';
   totalAudio: string;     // Path to full mix
   totalScore?: string;    // Path to full score PDF
-  tracks: Track[];        // Individual instrument tracks with section grouping
+  tracks: Track[];        // Individual instrument tracks
 }
 ```
-
-## Nginx Routing
-
-- `/api/*` → Backend (FastAPI) on port 8000
-- `/*` → Frontend (Next.js) on port 3000
 
 ## Environment Variables
 
 Copy `backend/.env.example` to `backend/.env`:
 
-- `AUDD_API_KEY` - Audio analysis API key
-- `AI_API_KEY` - AI chat API key
-- `AI_BASE_URL` - AI API endpoint
-- `AI_MODEL` - AI model name
-- `CORS_ORIGINS` - Allowed CORS origins (JSON array)
+- `CORS_ORIGINS` - Allowed origins (JSON array)
+- `REDIS_URL` - Redis connection for Celery
+- `AI_API_KEY`, `AI_BASE_URL`, `AI_MODEL` - AI chat service
+- `AUDD_API_KEY` - Audio analysis API
+- `IMAGE_API_PROVIDER` - "openai" or "google"
+- `OPENAI_IMAGE_*` / `GOOGLE_IMAGE_*` - Image generation config
 
 ## Asset Locations
 
-- Audio files: `frontend/public/audio/`
-- Score PDFs: `frontend/public/scores/`
-- Song metadata: `backend/songs/`
+- Audio: `frontend/public/audio/`
+- Scores: `frontend/public/scores/`
+- Generated videos: `frontend/public/videos/`
+- Song metadata: `frontend/src/data/songs.json`

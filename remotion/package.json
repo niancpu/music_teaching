@@ -8,15 +8,20 @@
     "preview": "remotion preview"
   },
   "dependencies": {
+    "@react-three/fiber": "^8.18.0",
     "@remotion/cli": "^4.0.0",
     "@remotion/player": "^4.0.0",
+    "@remotion/three": "^4.0.414",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "remotion": "^4.0.0"
+    "remotion": "^4.0.0",
+    "three": "^0.160.1",
+    "zod": "^3.22.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "@types/three": "^0.160.0",
     "typescript": "^5.3.0"
   }
 }

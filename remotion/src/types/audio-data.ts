@@ -1,6 +1,7 @@
 /**
  * Audio analysis data types matching backend output.
  */
+import { z } from "zod";
 
 export interface AudioFrameData {
   time: number;        // Timestamp in seconds
@@ -15,11 +16,16 @@ export interface AudioAnalysisData {
   frames: AudioFrameData[];
 }
 
-export interface VisualizationProps {
-  dataFile: string;    // Path to analysis JSON (e.g., "/data/xxx.json")
-  audioSrc: string;    // Path to audio file (e.g., "/audio/xxx.mp3")
-  colorScheme: string; // Color scheme name
-}
+/**
+ * Zod schema for visualization props - required for Remotion Composition typing
+ */
+export const VisualizationPropsSchema = z.object({
+  dataFile: z.string(),    // Path to analysis JSON (e.g., "/data/xxx.json")
+  audioSrc: z.string(),    // Path to audio file (e.g., "/audio/xxx.mp3")
+  colorScheme: z.string(), // Color scheme name
+});
+
+export type VisualizationProps = z.infer<typeof VisualizationPropsSchema>;
 
 export type ColorScheme = {
   primary: string;
