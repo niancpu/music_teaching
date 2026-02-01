@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import SongCard from '@/components/SongCard';
+import VoiceChat from '@/components/VoiceChat';
 import { fetchSongs } from '@/lib/api/server';
 import songsData from '@/data/songs.json';
 import type { Song } from '@/types/song';
@@ -31,11 +32,61 @@ export default async function Home() {
               开始探索
             </Link>
             <Link
-              href="#"
+              href="#voice-chat"
               className="px-6 py-2.5 bg-white text-blue-500 text-sm font-medium border border-gray-200 rounded hover:bg-gray-50 hover:border-blue-500 transition-colors"
             >
-              了解更多
+              AI语音互动
             </Link>
+          </div>
+        </div>
+      </section>
+
+      <div className="border-t border-gray-200" />
+
+      {/* AI Voice Chat Section */}
+      <section id="voice-chat" className="py-16 px-6 bg-gradient-to-b from-blue-50 to-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            {/* 左侧介绍 */}
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-600 text-sm font-medium rounded-full mb-4">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                  <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                </svg>
+                AI 语音助手
+              </div>
+              <h2 className="text-3xl font-medium text-gray-900 mb-4">AI音乐教师语音互动</h2>
+              <p className="text-gray-500 mb-6 leading-relaxed">
+                与AI音乐教师进行实时语音对话，获取专业的音乐知识解答。
+                无论是乐理知识、演奏技巧还是音乐欣赏，AI教师都能为你提供耐心细致的指导。
+              </p>
+              <ul className="space-y-3 text-gray-600">
+                <li className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>实时语音对话，自然流畅</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>专业音乐知识，随时解答</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>耐心细致指导，因材施教</span>
+                </li>
+              </ul>
+            </div>
+            
+            {/* 右侧语音组件 */}
+            <div className="flex justify-center">
+              <VoiceChat className="w-full max-w-md shadow-lg" />
+            </div>
           </div>
         </div>
       </section>
