@@ -15,6 +15,9 @@ export default function Navbar() {
           <Link href="/library" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
             音频库
           </Link>
+          <Link href="/visualization" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
+            可视化工作室
+          </Link>
           <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
             课件中心
           </Link>
