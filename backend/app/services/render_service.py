@@ -121,7 +121,8 @@ async def render_visualization(task_id: str, request: VisualizationRequest) -> N
         composition_map = {
             "circular": "CircularWaveform",
             "radial": "RadialWaveform",
-            "bars": "BarWaveform"
+            "bars": "BarWaveform",
+            "particle": "ParticleBreathing"
         }
         composition = composition_map.get(request.style, "CircularWaveform")
 
@@ -296,7 +297,8 @@ def render_visualization_sync(task_id: str, request: VisualizationRequest) -> No
         composition_map = {
             "circular": "CircularWaveform",
             "radial": "RadialWaveform",
-            "bars": "BarWaveform"
+            "bars": "BarWaveform",
+            "particle": "ParticleBreathing"
         }
         composition = composition_map.get(request.style, "CircularWaveform")
 

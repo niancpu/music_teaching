@@ -1,8 +1,8 @@
-import { API_V1_URL } from '../config';
+import { apiPostDirect, apiGetDirect } from '../client';
 
 export interface VisualizationRequest {
   audio_path: string;
-  style: 'circular' | 'radial' | 'bars';
+  style: 'circular' | 'radial' | 'bars' | 'particle';
   color_scheme: string;
   resolution: '720p' | '1080p' | '4k';
 }
@@ -21,27 +21,9 @@ export interface VisualizationTaskResponse {
 }
 
 export const createVisualization = async (data: VisualizationRequest): Promise<VisualizationTaskResponse> => {
-  const response = await fetch(`${API_V1_URL}/visualization/render`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-  
-  if (!response.ok) {
-    throw new Error('Failed to create visualization task');
-  }
-  
-  return response.json();
+  return apiPostDirect<VisualizationTaskResponse, VisualizationRequest>('/visualization/render', data);
 };
 
 export const getVisualizationStatus = async (taskId: string): Promise<VisualizationTask> => {
-  const response = await fetch(`${API_V1_URL}/visualization/status/${taskId}`);
-  
-  if (!response.ok) {
-    throw new Error('Failed to get visualization status');
-  }
-  
-  return response.json();
+  return apiGetDirect<VisualizationTask>(`/visualization/status/${taskId}`);
 };

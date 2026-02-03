@@ -1,4 +1,4 @@
-import { API_V1_URL } from '../config';
+import { apiPostDirect, apiGetDirect } from '../client';
 
 export interface AudioFeatures {
   tempo: number;
@@ -34,29 +34,9 @@ export interface ImageGenerationSubmitResponse {
 }
 
 export const createImageGenerationTask = async (data: ImageGenerationRequest): Promise<ImageGenerationSubmitResponse> => {
-  const response = await fetch(`${API_V1_URL}/image-generation/generate`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || '提交图片生成任务失败');
-  }
-  
-  return response.json();
+  return apiPostDirect<ImageGenerationSubmitResponse, ImageGenerationRequest>('/image-generation/generate', data);
 };
 
 export const getImageGenerationStatus = async (taskId: string): Promise<ImageGenerationTask> => {
-  const response = await fetch(`${API_V1_URL}/image-generation/status/${taskId}`);
-  
-  if (!response.ok) {
-     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || '获取任务状态失败');
-  }
-  
-  return response.json();
+  return apiGetDirect<ImageGenerationTask>(`/image-generation/status/${taskId}`);
 };

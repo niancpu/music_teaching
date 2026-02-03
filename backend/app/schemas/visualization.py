@@ -23,7 +23,7 @@ class AudioAnalysisData(BaseModel):
 class VisualizationRequest(BaseModel):
     """Request to create a visualization video."""
     audio_path: str       # Relative path to audio file (e.g., "ode-to-joy/total.mp3")
-    style: Literal["circular", "radial", "bars"] = "circular"
+    style: Literal["circular", "radial", "bars", "particle"] = "circular"
     color_scheme: str = "blue"
     resolution: Literal["720p", "1080p", "4k"] = "1080p"
 
